@@ -7,6 +7,7 @@ Every word, sentence, and paragraph remains 100% selectable, editable, and re-fl
 import io
 import os
 import re
+import html
 from typing import Optional, Callable, Dict, Any, Tuple, List
 import docx
 from docx.shared import Pt, Inches, RGBColor
@@ -14,6 +15,15 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 import fitz
+
+
+def sanitize_xml_string(s: str) -> str:
+    """Strip XML 1.0 invalid control characters and escape XML entities."""
+    if not s:
+        return ""
+    # Remove XML 1.0 invalid control characters
+    cleaned = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFDD0-\uFDEF\uFFFE\uFFFF]", "", s)
+    return html.escape(cleaned)
 
 
 class ExactLayoutConverter:
@@ -145,10 +155,8 @@ class ExactLayoutConverter:
                     if rect.width < 10 or rect.height < 10:
                         continue
                     
-                    # Convert to PNG stream
                     img_stream = io.BytesIO(image_bytes)
                     try:
-                        # Save temp image for docx embedding
                         self._embed_floating_picture(
                             doc, p_page, img_stream,
                             x_pt=rect.x0,
@@ -176,11 +184,9 @@ class ExactLayoutConverter:
         self._shape_id_counter += 1
         shape_id = self._shape_id_counter
 
-        # Add image part to doc
         run = p_page.add_run()
         picture = run.add_picture(img_stream, width=Pt(w_pt), height=Pt(h_pt))
         
-        # Modify picture XML to be floating at exact coordinates
         inline_elem = picture._inline
         parent = inline_elem.getparent()
         
@@ -206,8 +212,10 @@ class ExactLayoutConverter:
                     <wp:posOffset>{emu_y}</wp:posOffset>
                 </wp:positionV>
                 <wp:extent cx="{emu_w}" cy="{emu_h}"/>
+                <wp:effectExtent b="0" l="0" r="0" t="0"/>
                 <wp:wrapNone/>
                 <wp:docPr id="{shape_id}" name="Picture {shape_id}"/>
+                <wp:cNvGraphicFramePr/>
             </wp:anchor>
             """
             anchor_elem = parse_xml(anchor_xml)
@@ -228,14 +236,12 @@ class ExactLayoutConverter:
 
         emu_x = int(x_pt * self.PT_TO_EMU)
         emu_y = int(y_pt * self.PT_TO_EMU)
-        # Add slight safety padding to width and height to ensure zero text clipping
         emu_w = int((w_pt + 12) * self.PT_TO_EMU)
         emu_h = int((h_pt + 8) * self.PT_TO_EMU)
 
-        # Build paragraphs XML inside text box
         paragraphs_xml = []
 
-        for line_idx, line in enumerate(lines):
+        for line in lines:
             spans = line.get("spans", [])
             if not spans:
                 continue
@@ -246,8 +252,16 @@ class ExactLayoutConverter:
                 if not text:
                     continue
 
+                safe_text = sanitize_xml_string(text)
+                if not safe_text:
+                    continue
+
                 font_name = span.get("font", "Calibri")
                 clean_font = re.sub(r"^[A-Z]{6}\+", "", font_name)  # Clean subset prefix
+                clean_font = sanitize_xml_string(clean_font)
+                if not clean_font:
+                    clean_font = "Calibri"
+
                 size_pt = span.get("size", 10.0)
                 size_half_pt = int(size_pt * 2)
 
@@ -260,13 +274,6 @@ class ExactLayoutConverter:
 
                 bold_xml = "<w:b/>" if is_bold else ""
                 italic_xml = "<w:i/>" if is_italic else ""
-
-                # Escape XML
-                safe_text = (
-                    text.replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                )
 
                 runs_xml.append(f"""
                 <w:r>
@@ -283,12 +290,13 @@ class ExactLayoutConverter:
                 """)
 
             joined_runs = "".join(runs_xml)
-            p_spacing = '<w:spacing w:line="240" w:lineRule="auto" w:before="0" w:after="0"/>'
+            if not joined_runs.strip():
+                continue
 
             paragraphs_xml.append(f"""
             <w:p>
                 <w:pPr>
-                    {p_spacing}
+                    <w:spacing w:line="240" w:lineRule="auto" w:before="0" w:after="0"/>
                 </w:pPr>
                 {joined_runs}
             </w:p>
@@ -314,11 +322,14 @@ class ExactLayoutConverter:
                         <wp:posOffset>{emu_y}</wp:posOffset>
                     </wp:positionV>
                     <wp:extent cx="{emu_w}" cy="{emu_h}"/>
+                    <wp:effectExtent b="0" l="0" r="0" t="0"/>
                     <wp:wrapNone/>
                     <wp:docPr id="{shape_id}" name="TextBox {shape_id}"/>
+                    <wp:cNvGraphicFramePr/>
                     <a:graphic>
                         <a:graphicData uri="http://schemas.microsoft.com/office/word/2010/wordprocessingShape">
                             <wps:wsp>
+                                <wps:cNvSpPr/>
                                 <wps:spPr>
                                     <a:xfrm>
                                         <a:off x="0" y="0"/>
@@ -328,6 +339,7 @@ class ExactLayoutConverter:
                                     <a:noFill/>
                                     <a:ln><a:noFill/></a:ln>
                                 </wps:spPr>
+                                <wps:bodyPr rot="0" vert="horz" wrap="none" lIns="0" tIns="0" rIns="0" bIns="0" numCol="1" spcCol="0"/>
                                 <wps:txbx>
                                     <w:txbxContent>
                                         {joined_paragraphs}
