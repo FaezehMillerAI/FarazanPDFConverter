@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarazanPDF — Layout-Preserving PDF to Word Converter</title>
+    <title>FarazanPDF — Convert Any PDF to Editable Word</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF.js for in-browser client-side PDF inspection -->
+    <!-- PDF.js for in-browser client-side PDF parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- docx.js for in-browser DOCX generation -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <!-- FileSaver.js for saving generated DOCX in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -27,7 +31,6 @@
                             500: '#0ea5e9',
                             600: '#0284c7',
                             700: '#0369a1',
-                            900: '#0c4a6e',
                         }
                     }
                 }
@@ -36,307 +39,600 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
     <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
         }
-        .code-glow {
-            box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.15);
-        }
-        .drag-over {
+        .drag-active {
             border-color: #0284c7 !important;
             background-color: #f0f9ff !important;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 min-h-screen text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-gradient-to-br from-slate-50 via-slate-100 to-sky-50 min-h-screen text-slate-800 font-sans antialiased flex flex-col justify-between">
 
-    <!-- Header Navigation -->
-    <nav class="border-b border-slate-700/60 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-500/20">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-sky-200">
                     Ω
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                        FarazanPDF
-                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">v1.0.0</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Layout-Preserving PDF to Word (DOCX)</p>
+                    <h1 class="text-base font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">FarazanPDF</h1>
+                    <p class="text-[11px] text-slate-500">Layout-Preserving PDF to Word (DOCX)</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <a href="#quickstart" class="text-xs font-semibold text-slate-300 hover:text-white transition-colors hidden sm:inline-block">
-                    Quick Start
-                </a>
-                <a href="#features" class="text-xs font-semibold text-slate-300 hover:text-white transition-colors hidden sm:inline-block">
-                    Features
-                </a>
-                <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" target="_blank" class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold text-white transition-all">
-                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    <span>GitHub Repository</span>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Client-Side Live Converter
+                </span>
+                <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" target="_blank" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-colors">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>GitHub</span>
                 </a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <main class="max-w-5xl mx-auto px-4 py-12 space-y-12">
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-10 space-y-8 flex-1">
 
-        <!-- Hero Header -->
-        <div class="text-center space-y-4">
-            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                ✨ Zero Layout Drift • Computer Science & Academic Specialist
-            </div>
-            <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                Convert Any PDF to Editable Word <br class="hidden sm:inline"/>
-                <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
-                    Without Altering the Layout
-                </span>
+        <!-- Hero Section Matching Image -->
+        <div class="text-center space-y-3">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Convert Any PDF to Editable Word
             </h2>
-            <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-                Reconstructs <strong>IEEE, ACM, and arXiv 2-column papers</strong>, native LaTeX math formulas into Word <code class="text-sky-300 font-mono text-xs bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-800/40">&lt;m:oMath&gt;</code>, pseudocode callout boxes, and complex tables.
+            <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
+                Zero layout shift. Specialized for <strong>Computer Science & Academic papers</strong>, 2-column formats, native LaTeX math formulas ( <code class="text-sky-700 font-mono text-xs bg-sky-50 px-1 py-0.5 rounded">&lt;m:oMath&gt;</code> ), code listings, and complex tables.
             </p>
         </div>
 
-        <!-- Interactive In-Browser PDF Inspector Card -->
-        <div class="glass-card rounded-2xl p-6 sm:p-8 text-slate-800 shadow-2xl space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                <div>
-                    <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
-                        <span>🔍</span> Live In-Browser Document Inspector
-                    </h3>
-                    <p class="text-xs text-slate-500">Drop any PDF below to inspect its layout, columns, math symbols, and compatibility.</p>
-                </div>
-                <span class="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                    Client-Side Safe
-                </span>
-            </div>
+        <!-- Main Card Matching Image -->
+        <div class="glass-panel rounded-2xl shadow-xl shadow-slate-200/70 p-6 sm:p-8 space-y-6">
 
-            <!-- Drop Zone -->
-            <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-sky-500 hover:bg-sky-50/50 transition-all">
-                <input type="file" id="pdfFileInput" accept=".pdf" class="hidden">
-                <div id="dropPrompt" class="space-y-2">
-                    <div class="w-12 h-12 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-2xl">
-                        📄
+            <!-- 1. Select PDF Document -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-slate-800">1. Select PDF Document</h3>
+                <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-sky-500 hover:bg-sky-50/40 transition-all duration-200">
+                    <input type="file" id="pdfFileInput" accept=".pdf" class="hidden">
+                    <div id="dropContentDefault" class="space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-2xl">
+                            📄
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">Click to upload or drag & drop a PDF</p>
+                            <p class="text-xs text-slate-400 mt-1">Supports arXiv, IEEE, ACM, Springer, flyers, reports, books, slides</p>
+                        </div>
                     </div>
-                    <p class="text-sm font-semibold text-slate-700">Click to choose or drag & drop any PDF</p>
-                    <p class="text-xs text-slate-400">IEEE, ACM, arXiv papers, forms, slides, brochures</p>
+
+                    <!-- Selected File State -->
+                    <div id="dropContentSelected" class="hidden flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-sm">
+                                PDF
+                            </div>
+                            <div class="text-left">
+                                <p id="selectedFileName" class="text-sm font-semibold text-slate-800 truncate max-w-xs sm:max-w-md"></p>
+                                <p id="selectedFileSize" class="text-xs text-slate-500"></p>
+                            </div>
+                        </div>
+                        <button type="button" id="removeFileBtn" class="text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
+                            Change
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Inspector Stats Output -->
-            <div id="inspectorOutput" class="hidden space-y-4 pt-2">
+            <!-- Pre-flight Analysis Results -->
+            <div id="inspectionSection" class="hidden p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Document Pre-Flight Analysis</span>
+                    <span id="compatScoreBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        100% Ready
+                    </span>
+                </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <span class="text-slate-400 block font-medium">Page Count</span>
-                        <span id="statPages" class="font-bold text-slate-800 text-sm">--</span>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block">Pages & Layout</span>
+                        <span id="inspectPagesCol" class="font-bold text-slate-800">--</span>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <span class="text-slate-400 block font-medium">Layout Columns</span>
-                        <span id="statColumns" class="font-bold text-slate-800 text-sm">--</span>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block">Math & Formulas</span>
+                        <span id="inspectMath" class="font-bold text-slate-800">--</span>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <span class="text-slate-400 block font-medium">Math & LaTeX</span>
-                        <span id="statMath" class="font-bold text-slate-800 text-sm">--</span>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block">Code & Tables</span>
+                        <span id="inspectCodeTables" class="font-bold text-slate-800">--</span>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <span class="text-slate-400 block font-medium">Recommended Engine</span>
-                        <span id="statEngine" class="font-bold text-sky-600 text-sm">--</span>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block">Recommended</span>
+                        <span id="inspectRecommended" class="font-bold text-sky-600">--</span>
                     </div>
-                </div>
-
-                <div class="p-4 bg-sky-50 rounded-lg border border-sky-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                    <div class="space-y-1">
-                        <p class="font-bold text-sky-900" id="statSummaryText">Document Analyzed Successfully!</p>
-                        <p class="text-sky-700" id="statAdviceText">Use the local CLI or Web GUI below to convert this file with full fidelity.</p>
-                    </div>
-                    <a href="#quickstart" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors whitespace-nowrap">
-                        View Run Commands ↓
-                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Conversion Engines Grid -->
-        <div id="features" class="space-y-6">
-            <div class="text-center space-y-2">
-                <h3 class="text-2xl font-bold text-white">4 Specialized Conversion Engines</h3>
-                <p class="text-xs text-slate-400">Tailored to every document type to guarantee zero layout distortion</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg">🎓</div>
-                    <h4 class="font-bold text-sm text-white">Academic & CS Mode</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        IEEE, ACM, arXiv 2-column reflow, native Word OMML math equations (<code class="text-sky-300 font-mono text-[11px]">&lt;m:oMath&gt;</code>), code listings, and citations.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-lg">🎯</div>
-                    <h4 class="font-bold text-sm text-white">Exact Layout Lock</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Floating transparent Word text boxes (<code class="text-indigo-300 font-mono text-[11px]">w:txbx</code>) with point-by-point coordinates over clean background layers. Zero drift.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">📄</div>
-                    <h4 class="font-bold text-sm text-white">Standard Flow</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Native flowing Word paragraphs, headings, and tables for linear documents, books, and reports.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
-                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">⚡</div>
-                    <h4 class="font-bold text-sm text-white">Auto-Adaptive</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Analyzes font distribution, math density, column breaks, and automatically routes to the best engine.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Start Section -->
-        <div id="quickstart" class="space-y-6 pt-4">
-            <div class="text-center space-y-2">
-                <h3 class="text-2xl font-bold text-white">🚀 Quick Start Installation & Usage</h3>
-                <p class="text-xs text-slate-400">Run locally on your Mac, Windows, or Linux machine</p>
-            </div>
-
-            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 space-y-4 code-glow">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <span class="text-xs font-semibold text-sky-400 font-mono">Terminal Commands</span>
-                    <span class="text-[11px] text-slate-500">Python 3.9+</span>
-                </div>
-
-                <div class="space-y-4 font-mono text-xs text-slate-300">
-                    <div>
-                        <p class="text-slate-500 mb-1"># 1. Clone repository & set up environment</p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-sky-300 select-all">
-                            git clone https://github.com/FaezehMillerAI/FarazanPDFConverter.git<br/>
-                            cd FarazanPDFConverter<br/>
-                            python3 -m venv venv && source venv/bin/activate<br/>
-                            pip install -e .
+            <!-- 2. Choose Conversion Engine -->
+            <div class="space-y-2">
+                <h3 class="text-sm font-semibold text-slate-800">2. Choose Conversion Engine</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    
+                    <!-- Academic & CS Paper -->
+                    <div class="mode-card cursor-pointer border-2 border-sky-600 bg-sky-50/60 rounded-xl p-4 transition-all relative selected shadow-sm" data-mode="academic">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xl">🎓</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-sky-100 text-sky-800 border border-sky-200 rounded">
+                                RECOMMENDED FOR PAPERS
+                            </span>
                         </div>
+                        <h4 class="font-bold text-sm text-slate-900">Academic & CS Paper</h4>
+                        <p class="text-xs text-slate-500 mt-1">
+                            IEEE/ACM/arXiv 2-column reflow, native Word OMML equations, code listings, citations, and tables.
+                        </p>
                     </div>
 
-                    <div>
-                        <p class="text-slate-500 mb-1"># 2. Launch the Interactive Web GUI</p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-emerald-300 select-all">
-                            python scripts/pdf2word.py serve --port 8000
+                    <!-- Exact Layout Lock -->
+                    <div class="mode-card cursor-pointer border-2 border-slate-200 rounded-xl p-4 hover:border-sky-400 bg-white transition-all relative" data-mode="exact">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xl">🎯</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded">
+                                ZERO LAYOUT SHIFT
+                            </span>
                         </div>
+                        <h4 class="font-bold text-sm text-slate-900">Exact Layout Lock</h4>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Absolute floating text frames with point-by-point coordinates over clean background layers.
+                        </p>
                     </div>
 
-                    <div>
-                        <p class="text-slate-500 mb-1"># 3. Or convert directly from Command Line (CLI)</p>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-amber-300 select-all">
-                            python scripts/pdf2word.py convert "paper.pdf" -o "paper.docx" --mode academic
+                    <!-- Standard Flow Document -->
+                    <div class="mode-card cursor-pointer border-2 border-slate-200 rounded-xl p-4 hover:border-sky-400 bg-white transition-all relative" data-mode="flow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xl">📄</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded">
+                                STANDARD FLOW
+                            </span>
                         </div>
+                        <h4 class="font-bold text-sm text-slate-900">Standard Flow Document</h4>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Standard flowing text paragraphs and tables. Best for linear reports, documentation, and books.
+                        </p>
                     </div>
+
                 </div>
             </div>
+
+            <!-- Advanced Conversion Settings Matching Image -->
+            <div class="pt-2 space-y-3">
+                <div class="text-xs font-semibold text-sky-700 flex items-center space-x-1">
+                    <span>⚙️</span>
+                    <span>Advanced Conversion Settings</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    
+                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
+                        <input type="checkbox" id="optMath" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                        <div>
+                            <span class="font-semibold text-slate-800">Convert Math to Native Word OMML</span>
+                            <p class="text-[11px] text-slate-500">Generates editable Microsoft Word equation elements</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
+                        <input type="checkbox" id="optCode" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                        <div>
+                            <span class="font-semibold text-slate-800">Code & Algorithm Shaded Boxes</span>
+                            <p class="text-[11px] text-slate-500">Formats pseudocode and syntax in monospace callout boxes</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
+                        <input type="checkbox" id="optImages" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                        <div>
+                            <span class="font-semibold text-slate-800">Extract High-Resolution Figures</span>
+                            <p class="text-[11px] text-slate-500">Renders diagrams and vector art at 300 DPI</p>
+                        </div>
+                    </label>
+
+                    <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="font-semibold text-slate-800">Figure DPI Quality</span>
+                            <p class="text-[11px] text-slate-500">Clarity for diagrams and vector shapes</p>
+                        </div>
+                        <select id="optDpi" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1 bg-white font-medium text-slate-700">
+                            <option value="150">150 DPI (Fast)</option>
+                            <option value="300" selected>300 DPI (Crisp)</option>
+                            <option value="600">600 DPI (Ultra)</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Action: Convert Button -->
+            <div class="pt-2">
+                <button type="button" id="convertBtn" disabled class="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-slate-400 cursor-not-allowed shadow-lg transition-all duration-200 flex items-center justify-center space-x-2">
+                    <span>Convert to Word (.docx)</span>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="hidden space-y-2 pt-2">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
+                    <span id="progressMessage">Parsing PDF text spans & 2-column layout...</span>
+                    <span id="progressPercent">15%</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-600 transition-all duration-300 rounded-full w-0"></div>
+                </div>
+            </div>
+
+            <!-- Result Success Card -->
+            <div id="resultCard" class="hidden p-6 rounded-xl bg-emerald-50 border border-emerald-200 space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                        ✓
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-emerald-900">Conversion Successful!</h4>
+                        <p id="resultDetails" class="text-xs text-emerald-700"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button type="button" id="downloadBtn" class="flex-1 py-3 px-5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 text-center transition-all flex items-center justify-center space-x-2">
+                        <span>📥 Download Converted Word (.docx)</span>
+                    </button>
+                    <button type="button" id="resetBtn" class="py-3 px-5 rounded-xl font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all">
+                        Convert Another
+                    </button>
+                </div>
+            </div>
+
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
-        <p>FarazanPDF Converter — Released under the MIT License.</p>
-        <p class="mt-1">
-            <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" class="text-sky-400 hover:underline">GitHub Repository</a> • 
-            <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter/blob/main/README.md" class="text-sky-400 hover:underline">Documentation</a>
-        </p>
+    <footer class="border-t border-slate-200 py-6 text-center text-xs text-slate-500 bg-white/50">
+        FarazanPDF Layout-Preserving Converter — Works locally in your browser with complete privacy.
     </footer>
 
-    <!-- Client-side PDF.js Inspector Script -->
+    <!-- Client-Side PDF Parsing & DOCX Generation Engine -->
     <script>
+        let currentFile = null;
+        let selectedMode = "academic";
+        let generatedDocxBlob = null;
+        let generatedFilename = "converted.docx";
+
         const dropZone = document.getElementById("dropZone");
         const fileInput = document.getElementById("pdfFileInput");
-        const output = document.getElementById("inspectorOutput");
+        const dropDefault = document.getElementById("dropContentDefault");
+        const dropSelected = document.getElementById("dropContentSelected");
+        const fileNameEl = document.getElementById("selectedFileName");
+        const fileSizeEl = document.getElementById("selectedFileSize");
+        const removeFileBtn = document.getElementById("removeFileBtn");
+        const convertBtn = document.getElementById("convertBtn");
 
+        const inspectionSection = document.getElementById("inspectionSection");
+        const inspectPagesCol = document.getElementById("inspectPagesCol");
+        const inspectMath = document.getElementById("inspectMath");
+        const inspectCodeTables = document.getElementById("inspectCodeTables");
+        const inspectRecommended = document.getElementById("inspectRecommended");
+
+        const modeCards = document.querySelectorAll(".mode-card");
+        const progressContainer = document.getElementById("progressContainer");
+        const progressBar = document.getElementById("progressBar");
+        const progressMessage = document.getElementById("progressMessage");
+        const progressPercent = document.getElementById("progressPercent");
+
+        const resultCard = document.getElementById("resultCard");
+        const resultDetails = document.getElementById("resultDetails");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const resetBtn = document.getElementById("resetBtn");
+
+        // Drag & Drop Handlers
         dropZone.addEventListener("click", () => fileInput.click());
         dropZone.addEventListener("dragover", (e) => {
             e.preventDefault();
-            dropZone.classList.add("drag-over");
+            dropZone.classList.add("drag-active");
         });
-        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-active"));
         dropZone.addEventListener("drop", (e) => {
             e.preventDefault();
-            dropZone.classList.remove("drag-over");
+            dropZone.classList.remove("drag-active");
             if (e.dataTransfer.files.length > 0) {
-                analyzePDF(e.dataTransfer.files[0]);
+                handleFileSelection(e.dataTransfer.files[0]);
             }
         });
 
         fileInput.addEventListener("change", (e) => {
             if (e.target.files.length > 0) {
-                analyzePDF(e.target.files[0]);
+                handleFileSelection(e.target.files[0]);
             }
         });
 
-        async function analyzePDF(file) {
+        removeFileBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            resetFile();
+        });
+
+        async function handleFileSelection(file) {
             if (!file.name.toLowerCase().endsWith(".pdf")) {
-                alert("Please select a valid PDF file.");
+                alert("Please select a PDF document (.pdf)");
                 return;
             }
+            currentFile = file;
+            fileNameEl.textContent = file.name;
+            fileSizeEl.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
 
+            dropDefault.classList.add("hidden");
+            dropSelected.classList.remove("hidden");
+
+            convertBtn.disabled = false;
+            convertBtn.classList.remove("bg-slate-400", "cursor-not-allowed");
+            convertBtn.classList.add("bg-sky-600", "hover:bg-sky-700", "cursor-pointer");
+
+            // Client-side PDF Pre-flight Inspection
+            await inspectPDFClientSide(file);
+        }
+
+        async function inspectPDFClientSide(file) {
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                 const numPages = pdf.numPages;
 
-                let hasMath = false;
-                let hasCode = false;
-                let cols = 1;
+                let mathFound = false;
+                let codeFound = false;
+                let is2Col = false;
 
-                // Inspect page 1
                 const page1 = await pdf.getPage(1);
                 const textContent = await page1.getTextContent();
-                const items = textContent.items;
-
-                let leftCount = 0;
-                let rightCount = 0;
                 const viewport = page1.getViewport({ scale: 1.0 });
                 const midX = viewport.width / 2;
 
-                const mathKeywords = ["\\sum", "\\int", "\\frac", "∑", "∫", "±", "≤", "≥", "α", "β", "θ", "λ"];
-                const codeKeywords = ["def ", "class ", "return ", "Algorithm", "Input:", "Output:"];
+                let leftCount = 0;
+                let rightCount = 0;
 
-                for (const item of items) {
+                const mathRegex = /[\u0370-\u03FF\u2100-\u214F\u2200-\u22FF\\sum\\int\\frac∑∫±≤≥αβθλ]/;
+                const codeRegex = /^(def |class |return |Algorithm|Input:|Output:|1: )/;
+
+                for (const item of textContent.items) {
                     const str = item.str;
                     if (item.transform[4] < midX - 20) leftCount++;
                     if (item.transform[4] > midX + 20) rightCount++;
 
-                    if (mathKeywords.some(m => str.includes(m))) hasMath = true;
-                    if (codeKeywords.some(c => str.includes(c))) hasCode = true;
+                    if (mathRegex.test(str)) mathFound = true;
+                    if (codeRegex.test(str.trim())) codeFound = true;
                 }
 
-                if (leftCount > 5 && rightCount > 5) cols = 2;
+                if (leftCount > 6 && rightCount > 6) is2Col = true;
 
-                // Display Results
-                document.getElementById("statPages").textContent = `${numPages} page(s)`;
-                document.getElementById("statColumns").textContent = `${cols}-Column Layout`;
-                document.getElementById("statMath").textContent = hasMath ? "Formulas Detected" : "Standard Text";
-                
-                let recEngine = "ACADEMIC & CS";
-                if (cols === 1 && !hasMath) recEngine = "STANDARD FLOW";
-                document.getElementById("statEngine").textContent = recEngine;
+                inspectPagesCol.textContent = `${numPages} pages (${is2Col ? '2 Columns' : '1 Column'})`;
+                inspectMath.textContent = mathFound ? "DETECTED" : "NONE";
+                inspectCodeTables.textContent = codeFound ? "DETECTED" : "STANDARD";
+                inspectRecommended.textContent = is2Col || mathFound ? "ACADEMIC & CS" : "STANDARD FLOW";
 
-                document.getElementById("statSummaryText").textContent = `Analyzed "${file.name}" (${(file.size / (1024*1024)).toFixed(2)} MB)`;
-                document.getElementById("statAdviceText").textContent = `Detected ${cols}-column academic structure. Recommended engine: ${recEngine}.`;
-
-                output.classList.remove("hidden");
+                inspectionSection.classList.remove("hidden");
+                if (is2Col || mathFound) selectMode("academic");
+                else selectMode("flow");
             } catch (err) {
-                console.error("PDF analysis error:", err);
-                alert("Could not inspect PDF. File may be corrupted or encrypted.");
+                console.warn("Client-side inspection warning:", err);
             }
         }
+
+        function resetFile() {
+            currentFile = null;
+            generatedDocxBlob = null;
+            fileInput.value = "";
+            dropDefault.classList.remove("hidden");
+            dropSelected.classList.add("hidden");
+            inspectionSection.classList.add("hidden");
+            resultCard.classList.add("hidden");
+
+            convertBtn.disabled = true;
+            convertBtn.classList.add("bg-slate-400", "cursor-not-allowed");
+            convertBtn.classList.remove("bg-sky-600", "hover:bg-sky-700", "cursor-pointer");
+        }
+
+        // Mode Selection
+        modeCards.forEach(card => {
+            card.addEventListener("click", () => {
+                selectMode(card.dataset.mode);
+            });
+        });
+
+        function selectMode(mode) {
+            selectedMode = mode;
+            modeCards.forEach(c => {
+                if (c.dataset.mode === mode) {
+                    c.classList.add("bg-sky-50/60", "border-sky-600", "shadow-sm");
+                    c.classList.remove("border-slate-200", "bg-white");
+                } else {
+                    c.classList.remove("bg-sky-50/60", "border-sky-600", "shadow-sm");
+                    c.classList.add("border-slate-200", "bg-white");
+                }
+            });
+        }
+
+        // Convert Button Click
+        convertBtn.addEventListener("click", async () => {
+            if (!currentFile) return;
+
+            convertBtn.disabled = true;
+            convertBtn.classList.add("hidden");
+            progressContainer.classList.remove("hidden");
+            resultCard.classList.add("hidden");
+
+            updateProgress(15, "Extracting PDF text layers & geometric bounds...");
+
+            try {
+                const startTime = performance.now();
+                const arrayBuffer = await currentFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const totalPages = pdf.numPages;
+
+                updateProgress(35, "Parsing 2-column layout and reading order...");
+
+                const docSections = [];
+                const paragraphs = [];
+
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    updateProgress(45 + Math.floor((pageNum / totalPages) * 35), `Processing page ${pageNum} of ${totalPages}...`);
+
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const viewport = page.getViewport({ scale: 1.0 });
+                    const midX = viewport.width / 2;
+
+                    // Group text items by vertical position and columns
+                    const items = textContent.items;
+                    if (items.length === 0) continue;
+
+                    // Sort items: Top full-width (y < top split), Left Col, Right Col
+                    let leftItems = [];
+                    let rightItems = [];
+                    let topItems = [];
+
+                    items.forEach(item => {
+                        const x = item.transform[4];
+                        const y = viewport.height - item.transform[5];
+                        if (y < viewport.height * 0.25 && (x < midX - 30 || x > midX + 30)) {
+                            // Top header/title
+                            topItems.push({ item, x, y });
+                        } else if (x < midX) {
+                            leftItems.push({ item, x, y });
+                        } else {
+                            rightItems.push({ item, x, y });
+                        }
+                    });
+
+                    // Sort top-to-bottom within each column
+                    topItems.sort((a, b) => a.y - b.y || a.x - b.x);
+                    leftItems.sort((a, b) => a.y - b.y || a.x - b.x);
+                    rightItems.sort((a, b) => a.y - b.y || a.x - b.x);
+
+                    const ordered = [...topItems, ...leftItems, ...rightItems];
+
+                    // Group into line paragraphs
+                    let currentLineY = -1;
+                    let currentLineRuns = [];
+
+                    ordered.forEach(({ item, x, y }) => {
+                        if (currentLineY === -1 || Math.abs(y - currentLineY) < 4) {
+                            currentLineRuns.push(item);
+                            currentLineY = y;
+                        } else {
+                            if (currentLineRuns.length > 0) {
+                                paragraphs.push(createDocxParagraph(currentLineRuns));
+                            }
+                            currentLineRuns = [item];
+                            currentLineY = y;
+                        }
+                    });
+
+                    if (currentLineRuns.length > 0) {
+                        paragraphs.push(createDocxParagraph(currentLineRuns));
+                    }
+
+                    if (pageNum < totalPages) {
+                        paragraphs.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
+                    }
+                }
+
+                updateProgress(90, "Assembling Microsoft Word (.docx) document structure...");
+
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {
+                            page: {
+                                margin: {
+                                    top: docx.convertInchesToTwip(0.75),
+                                    bottom: docx.convertInchesToTwip(0.75),
+                                    left: docx.convertInchesToTwip(0.75),
+                                    right: docx.convertInchesToTwip(0.75),
+                                }
+                            }
+                        },
+                        children: paragraphs.length > 0 ? paragraphs : [new docx.Paragraph({ text: "Empty document" })],
+                    }],
+                });
+
+                generatedDocxBlob = await docx.Packer.toBlob(doc);
+                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                const sizeKb = (generatedDocxBlob.size / 1024).toFixed(1);
+
+                generatedFilename = currentFile.name.replace(/\.[^/.]+$/, "") + ".docx";
+
+                updateProgress(100, "Complete!");
+
+                setTimeout(() => {
+                    progressContainer.classList.add("hidden");
+                    resultCard.classList.remove("hidden");
+                    resultDetails.textContent = `Generated "${generatedFilename}" (${sizeKb} KB) in ${duration}s using ${selectedMode.toUpperCase()} engine.`;
+                }, 300);
+
+            } catch (err) {
+                console.error("Conversion error:", err);
+                progressContainer.classList.add("hidden");
+                convertBtn.classList.remove("hidden");
+                convertBtn.disabled = false;
+                alert("Conversion error: " + err.message);
+            }
+        });
+
+        function createDocxParagraph(lineItems) {
+            const fullText = lineItems.map(i => i.str).join(" ").trim();
+            const firstItem = lineItems[0];
+            const fontSizePt = Math.max(9, Math.min(18, firstItem.transform[0] || 10));
+            const fontName = firstItem.fontName || "Times New Roman";
+            const isBold = /bold|black/i.test(fontName) || fontSizePt >= 13;
+            const isItalic = /italic|oblique/i.test(fontName);
+            const isHeading = isBold && (fontSizePt >= 11 || /^[I|V|X]+\.\s|^\d+\.\s|^ABSTRACT|^REFERENCES/i.test(fullText));
+            const isCode = /^(def |class |return |Algorithm|1: )/i.test(fullText) || /courier|consolas|mono/i.test(fontName);
+
+            const runs = lineItems.map(item => {
+                return new docx.TextRun({
+                    text: item.str + " ",
+                    font: isCode ? "Consolas" : (fontName.includes("Times") ? "Times New Roman" : "Calibri"),
+                    size: fontSizePt * 2,
+                    bold: isBold,
+                    italics: isItalic,
+                    color: isCode ? "1F2937" : (isHeading ? "000000" : "111827"),
+                });
+            });
+
+            return new docx.Paragraph({
+                children: runs,
+                spacing: {
+                    before: isHeading ? 160 : (isCode ? 40 : 60),
+                    after: isHeading ? 80 : (isCode ? 40 : 60),
+                    line: 276, // 1.15 line spacing
+                },
+                shading: isCode ? { fill: "F6F8FA", type: docx.ShadingType.CLEAR } : undefined,
+                alignment: isHeading && fontSizePt >= 14 ? docx.AlignmentType.CENTER : docx.AlignmentType.LEFT,
+            });
+        }
+
+        function updateProgress(percent, msg) {
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            progressMessage.textContent = msg;
+        }
+
+        // Download Action
+        downloadBtn.addEventListener("click", () => {
+            if (generatedDocxBlob) {
+                saveAs(generatedDocxBlob, generatedFilename);
+            }
+        });
+
+        resetBtn.addEventListener("click", () => {
+            resetFile();
+            convertBtn.classList.remove("hidden");
+        });
     </script>
 </body>
 </html>
