@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarazanPDF — Layout-Preserving PDF to Word Converter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js for in-browser client-side PDF inspection -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .code-glow {
+            box-shadow: 0 0 25px -5px rgba(14, 165, 233, 0.15);
+        }
+        .drag-over {
+            border-color: #0284c7 !important;
+            background-color: #f0f9ff !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 min-h-screen text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <nav class="border-b border-slate-700/60 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-500/20">
+                    Ω
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        FarazanPDF
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">v1.0.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Layout-Preserving PDF to Word (DOCX)</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="#quickstart" class="text-xs font-semibold text-slate-300 hover:text-white transition-colors hidden sm:inline-block">
+                    Quick Start
+                </a>
+                <a href="#features" class="text-xs font-semibold text-slate-300 hover:text-white transition-colors hidden sm:inline-block">
+                    Features
+                </a>
+                <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" target="_blank" class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold text-white transition-all">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>GitHub Repository</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="max-w-5xl mx-auto px-4 py-12 space-y-12">
+
+        <!-- Hero Header -->
+        <div class="text-center space-y-4">
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                ✨ Zero Layout Drift • Computer Science & Academic Specialist
+            </div>
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                Convert Any PDF to Editable Word <br class="hidden sm:inline"/>
+                <span class="bg-gradient-to-r from-sky-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
+                    Without Altering the Layout
+                </span>
+            </h2>
+            <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+                Reconstructs <strong>IEEE, ACM, and arXiv 2-column papers</strong>, native LaTeX math formulas into Word <code class="text-sky-300 font-mono text-xs bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-800/40">&lt;m:oMath&gt;</code>, pseudocode callout boxes, and complex tables.
+            </p>
+        </div>
+
+        <!-- Interactive In-Browser PDF Inspector Card -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 text-slate-800 shadow-2xl space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                        <span>🔍</span> Live In-Browser Document Inspector
+                    </h3>
+                    <p class="text-xs text-slate-500">Drop any PDF below to inspect its layout, columns, math symbols, and compatibility.</p>
+                </div>
+                <span class="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                    Client-Side Safe
+                </span>
+            </div>
+
+            <!-- Drop Zone -->
+            <div id="dropZone" class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-sky-500 hover:bg-sky-50/50 transition-all">
+                <input type="file" id="pdfFileInput" accept=".pdf" class="hidden">
+                <div id="dropPrompt" class="space-y-2">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-2xl">
+                        📄
+                    </div>
+                    <p class="text-sm font-semibold text-slate-700">Click to choose or drag & drop any PDF</p>
+                    <p class="text-xs text-slate-400">IEEE, ACM, arXiv papers, forms, slides, brochures</p>
+                </div>
+            </div>
+
+            <!-- Inspector Stats Output -->
+            <div id="inspectorOutput" class="hidden space-y-4 pt-2">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block font-medium">Page Count</span>
+                        <span id="statPages" class="font-bold text-slate-800 text-sm">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block font-medium">Layout Columns</span>
+                        <span id="statColumns" class="font-bold text-slate-800 text-sm">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block font-medium">Math & LaTeX</span>
+                        <span id="statMath" class="font-bold text-slate-800 text-sm">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="text-slate-400 block font-medium">Recommended Engine</span>
+                        <span id="statEngine" class="font-bold text-sky-600 text-sm">--</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-sky-50 rounded-lg border border-sky-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <div class="space-y-1">
+                        <p class="font-bold text-sky-900" id="statSummaryText">Document Analyzed Successfully!</p>
+                        <p class="text-sky-700" id="statAdviceText">Use the local CLI or Web GUI below to convert this file with full fidelity.</p>
+                    </div>
+                    <a href="#quickstart" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors whitespace-nowrap">
+                        View Run Commands ↓
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Engines Grid -->
+        <div id="features" class="space-y-6">
+            <div class="text-center space-y-2">
+                <h3 class="text-2xl font-bold text-white">4 Specialized Conversion Engines</h3>
+                <p class="text-xs text-slate-400">Tailored to every document type to guarantee zero layout distortion</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg">🎓</div>
+                    <h4 class="font-bold text-sm text-white">Academic & CS Mode</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        IEEE, ACM, arXiv 2-column reflow, native Word OMML math equations (<code class="text-sky-300 font-mono text-[11px]">&lt;m:oMath&gt;</code>), code listings, and citations.
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-lg">🎯</div>
+                    <h4 class="font-bold text-sm text-white">Exact Layout Lock</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Floating transparent Word text boxes (<code class="text-indigo-300 font-mono text-[11px]">w:txbx</code>) with point-by-point coordinates over clean background layers. Zero drift.
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">📄</div>
+                    <h4 class="font-bold text-sm text-white">Standard Flow</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Native flowing Word paragraphs, headings, and tables for linear documents, books, and reports.
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg">⚡</div>
+                    <h4 class="font-bold text-sm text-white">Auto-Adaptive</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Analyzes font distribution, math density, column breaks, and automatically routes to the best engine.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start Section -->
+        <div id="quickstart" class="space-y-6 pt-4">
+            <div class="text-center space-y-2">
+                <h3 class="text-2xl font-bold text-white">🚀 Quick Start Installation & Usage</h3>
+                <p class="text-xs text-slate-400">Run locally on your Mac, Windows, or Linux machine</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 space-y-4 code-glow">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <span class="text-xs font-semibold text-sky-400 font-mono">Terminal Commands</span>
+                    <span class="text-[11px] text-slate-500">Python 3.9+</span>
+                </div>
+
+                <div class="space-y-4 font-mono text-xs text-slate-300">
+                    <div>
+                        <p class="text-slate-500 mb-1"># 1. Clone repository & set up environment</p>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-sky-300 select-all">
+                            git clone https://github.com/FaezehMillerAI/FarazanPDFConverter.git<br/>
+                            cd FarazanPDFConverter<br/>
+                            python3 -m venv venv && source venv/bin/activate<br/>
+                            pip install -e .
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-slate-500 mb-1"># 2. Launch the Interactive Web GUI</p>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-emerald-300 select-all">
+                            python scripts/pdf2word.py serve --port 8000
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-slate-500 mb-1"># 3. Or convert directly from Command Line (CLI)</p>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-amber-300 select-all">
+                            python scripts/pdf2word.py convert "paper.pdf" -o "paper.docx" --mode academic
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+        <p>FarazanPDF Converter — Released under the MIT License.</p>
+        <p class="mt-1">
+            <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" class="text-sky-400 hover:underline">GitHub Repository</a> • 
+            <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter/blob/main/README.md" class="text-sky-400 hover:underline">Documentation</a>
+        </p>
+    </footer>
+
+    <!-- Client-side PDF.js Inspector Script -->
+    <script>
+        const dropZone = document.getElementById("dropZone");
+        const fileInput = document.getElementById("pdfFileInput");
+        const output = document.getElementById("inspectorOutput");
+
+        dropZone.addEventListener("click", () => fileInput.click());
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("drag-over");
+        });
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("drag-over");
+            if (e.dataTransfer.files.length > 0) {
+                analyzePDF(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                analyzePDF(e.target.files[0]);
+            }
+        });
+
+        async function analyzePDF(file) {
+            if (!file.name.toLowerCase().endsWith(".pdf")) {
+                alert("Please select a valid PDF file.");
+                return;
+            }
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const numPages = pdf.numPages;
+
+                let hasMath = false;
+                let hasCode = false;
+                let cols = 1;
+
+                // Inspect page 1
+                const page1 = await pdf.getPage(1);
+                const textContent = await page1.getTextContent();
+                const items = textContent.items;
+
+                let leftCount = 0;
+                let rightCount = 0;
+                const viewport = page1.getViewport({ scale: 1.0 });
+                const midX = viewport.width / 2;
+
+                const mathKeywords = ["\\sum", "\\int", "\\frac", "∑", "∫", "±", "≤", "≥", "α", "β", "θ", "λ"];
+                const codeKeywords = ["def ", "class ", "return ", "Algorithm", "Input:", "Output:"];
+
+                for (const item of items) {
+                    const str = item.str;
+                    if (item.transform[4] < midX - 20) leftCount++;
+                    if (item.transform[4] > midX + 20) rightCount++;
+
+                    if (mathKeywords.some(m => str.includes(m))) hasMath = true;
+                    if (codeKeywords.some(c => str.includes(c))) hasCode = true;
+                }
+
+                if (leftCount > 5 && rightCount > 5) cols = 2;
+
+                // Display Results
+                document.getElementById("statPages").textContent = `${numPages} page(s)`;
+                document.getElementById("statColumns").textContent = `${cols}-Column Layout`;
+                document.getElementById("statMath").textContent = hasMath ? "Formulas Detected" : "Standard Text";
+                
+                let recEngine = "ACADEMIC & CS";
+                if (cols === 1 && !hasMath) recEngine = "STANDARD FLOW";
+                document.getElementById("statEngine").textContent = recEngine;
+
+                document.getElementById("statSummaryText").textContent = `Analyzed "${file.name}" (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+                document.getElementById("statAdviceText").textContent = `Detected ${cols}-column academic structure. Recommended engine: ${recEngine}.`;
+
+                output.classList.remove("hidden");
+            } catch (err) {
+                console.error("PDF analysis error:", err);
+                alert("Could not inspect PDF. File may be corrupted or encrypted.");
+            }
+        }
+    </script>
+</body>
+</html>
