@@ -1,5 +1,5 @@
 """
-FastAPI Web Application backend for OmniPDF.
+FastAPI Web Application backend for FarazanPDFConverter.
 Provides endpoints for upload, pre-flight inspection, conversion, and file download.
 """
 
@@ -17,7 +17,7 @@ from omnipdf.core.converter import OmniConverter, ConversionMode
 from omnipdf.core.inspector import PDFInspector
 
 app = FastAPI(
-    title="OmniPDF - PDF to Word Converter",
+    title="FarazanPDFConverter - PDF to Word Converter",
     description="Advanced layout-preserving PDF to editable Word (DOCX) converter",
     version="1.0.0",
 )

@@ -1,5 +1,5 @@
 """
-OmniPDF CLI: Command-line interface for layout-preserving PDF-to-Word conversion.
+FarazanPDFConverter CLI: Command-line interface for layout-preserving PDF-to-Word conversion.
 """
 
 import os
@@ -15,7 +15,7 @@ from omnipdf.core.inspector import PDFInspector
 
 app = typer.Typer(
     name="omnipdf",
-    help="OmniPDF: Advanced Layout-Preserving PDF to Word (DOCX) Converter",
+    help="FarazanPDFConverter: Advanced Layout-Preserving PDF to Word (DOCX) Converter",
     add_completion=False,
 )
 console = Console()
@@ -41,7 +41,7 @@ def convert(
         output_docx = f"{base}.docx"
 
     console.print(Panel.fit(
-        f"[bold cyan]OmniPDF Converter[/]\n"
+        f"[bold cyan]FarazanPDFConverter Converter[/]\n"
         f"Input: [yellow]{input_pdf}[/]\n"
         f"Output: [green]{output_docx}[/]\n"
         f"Mode: [magenta]{mode.upper()}[/]",
@@ -193,13 +193,13 @@ def serve(
     host: str = typer.Option("127.0.0.1", "--host", help="Host address for web server"),
     port: int = typer.Option(8000, "--port", "-p", help="Port for web server"),
 ):
-    """Launch the interactive OmniPDF Web Application."""
+    """Launch the interactive FarazanPDFConverter Web Application."""
     import uvicorn
     console.print(Panel.fit(
-        f"[bold green]Starting OmniPDF Web Interface[/]\n"
+        f"[bold green]Starting FarazanPDFConverter Web Interface[/]\n"
         f"URL: [bold underline cyan]http://{host}:{port}[/]\n"
         f"Press Ctrl+C to stop.",
-        title="OmniPDF Web Server"
+        title="FarazanPDFConverter Web Server"
     ))
     uvicorn.run("omnipdf.web.app:app", host=host, port=port, reload=False)
 

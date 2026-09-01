@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarazanPDF — Convert Any PDF to Editable Word</title>
+    <title>FarazanPDFConverter — Convert Any PDF to Editable Word</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PDF.js for in-browser client-side PDF parsing -->
@@ -40,9 +40,9 @@
     </script>
     <style>
         .glass-panel {
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
         .drag-active {
             border-color: #0284c7 !important;
@@ -52,7 +52,7 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-slate-100 to-sky-50 min-h-screen text-slate-800 font-sans antialiased flex flex-col justify-between">
 
-    <!-- Top Navigation Bar -->
+    <!-- Header Navigation -->
     <header class="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -60,13 +60,13 @@
                     Ω
                 </div>
                 <div>
-                    <h1 class="text-base font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">FarazanPDF</h1>
+                    <h1 class="text-base font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">FarazanPDFConverter</h1>
                     <p class="text-[11px] text-slate-500">Layout-Preserving PDF to Word (DOCX)</p>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Client-Side Live Converter
+                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Academic & STEM Ready
                 </span>
                 <a href="https://github.com/FaezehMillerAI/FarazanPDFConverter" target="_blank" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-colors">
                     <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -77,9 +77,9 @@
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-4xl mx-auto px-4 py-10 space-y-8 flex-1">
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8 flex-1">
 
-        <!-- Hero Section Matching Image -->
+        <!-- Hero Section -->
         <div class="text-center space-y-3">
             <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
                 Convert Any PDF to Editable Word
@@ -89,8 +89,8 @@
             </p>
         </div>
 
-        <!-- Main Card Matching Image -->
-        <div class="glass-panel rounded-2xl shadow-xl shadow-slate-200/70 p-6 sm:p-8 space-y-6">
+        <!-- Main Card -->
+        <div class="glass-panel rounded-2xl shadow-xl shadow-slate-200/60 p-6 sm:p-8 space-y-6">
 
             <!-- 1. Select PDF Document -->
             <div class="space-y-2">
@@ -130,7 +130,7 @@
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Document Pre-Flight Analysis</span>
                     <span id="compatScoreBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                        100% Ready
+                        98% Compatibility
                     </span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -162,7 +162,7 @@
                     <div class="mode-card cursor-pointer border-2 border-sky-600 bg-sky-50/60 rounded-xl p-4 transition-all relative selected shadow-sm" data-mode="academic">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xl">🎓</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-sky-100 text-sky-800 border border-sky-200 rounded">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-sky-200 text-sky-800 rounded">
                                 RECOMMENDED FOR PAPERS
                             </span>
                         </div>
@@ -173,10 +173,10 @@
                     </div>
 
                     <!-- Exact Layout Lock -->
-                    <div class="mode-card cursor-pointer border-2 border-slate-200 rounded-xl p-4 hover:border-sky-400 bg-white transition-all relative" data-mode="exact">
+                    <div class="mode-card cursor-pointer border-2 border-slate-200 bg-white rounded-xl p-4 hover:border-sky-500 transition-all relative" data-mode="exact">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xl">🎯</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded">
                                 ZERO LAYOUT SHIFT
                             </span>
                         </div>
@@ -187,10 +187,10 @@
                     </div>
 
                     <!-- Standard Flow Document -->
-                    <div class="mode-card cursor-pointer border-2 border-slate-200 rounded-xl p-4 hover:border-sky-400 bg-white transition-all relative" data-mode="flow">
+                    <div class="mode-card cursor-pointer border-2 border-slate-200 bg-white rounded-xl p-4 hover:border-sky-500 transition-all relative" data-mode="flow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xl">📄</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded">
                                 STANDARD FLOW
                             </span>
                         </div>
@@ -203,44 +203,44 @@
                 </div>
             </div>
 
-            <!-- Advanced Conversion Settings Matching Image -->
-            <div class="pt-2 space-y-3">
+            <!-- Advanced Conversion Settings -->
+            <div class="pt-2 border-t border-slate-100 space-y-3">
                 <div class="text-xs font-semibold text-sky-700 flex items-center space-x-1">
                     <span>⚙️</span>
                     <span>Advanced Conversion Settings</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     
-                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
-                        <input type="checkbox" id="optMath" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                    <label class="flex items-center space-x-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer">
+                        <input type="checkbox" id="optMath" checked class="w-4 h-4 text-sky-600 rounded">
                         <div>
                             <span class="font-semibold text-slate-800">Convert Math to Native Word OMML</span>
                             <p class="text-[11px] text-slate-500">Generates editable Microsoft Word equation elements</p>
                         </div>
                     </label>
 
-                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
-                        <input type="checkbox" id="optCode" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                    <label class="flex items-center space-x-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer">
+                        <input type="checkbox" id="optCode" checked class="w-4 h-4 text-sky-600 rounded">
                         <div>
                             <span class="font-semibold text-slate-800">Code & Algorithm Shaded Boxes</span>
                             <p class="text-[11px] text-slate-500">Formats pseudocode and syntax in monospace callout boxes</p>
                         </div>
                     </label>
 
-                    <label class="flex items-center space-x-3 p-3 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:border-sky-300 transition-colors">
-                        <input type="checkbox" id="optImages" checked class="w-4 h-4 text-sky-600 rounded border-slate-300">
+                    <label class="flex items-center space-x-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer">
+                        <input type="checkbox" id="optImages" checked class="w-4 h-4 text-sky-600 rounded">
                         <div>
                             <span class="font-semibold text-slate-800">Extract High-Resolution Figures</span>
                             <p class="text-[11px] text-slate-500">Renders diagrams and vector art at 300 DPI</p>
                         </div>
                     </label>
 
-                    <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between">
                         <div>
                             <span class="font-semibold text-slate-800">Figure DPI Quality</span>
                             <p class="text-[11px] text-slate-500">Clarity for diagrams and vector shapes</p>
                         </div>
-                        <select id="optDpi" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1 bg-white font-medium text-slate-700">
+                        <select id="optDpi" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white font-medium">
                             <option value="150">150 DPI (Fast)</option>
                             <option value="300" selected>300 DPI (Crisp)</option>
                             <option value="600">600 DPI (Ultra)</option>
@@ -292,11 +292,30 @@
 
         </div>
 
+        <!-- Feature Grid Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+            <div class="glass-panel p-5 rounded-xl space-y-2">
+                <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-sm">∑</div>
+                <h3 class="font-bold text-sm text-slate-800">Native Word Equations</h3>
+                <p class="text-xs text-slate-500">Converts inline and display mathematical formulas directly into native Microsoft Word OMML equations.</p>
+            </div>
+            <div class="glass-panel p-5 rounded-xl space-y-2">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">&lt;/&gt;</div>
+                <h3 class="font-bold text-sm text-slate-800">Algorithms & Code Blocks</h3>
+                <p class="text-xs text-slate-500">Automatically detects monospace code snippets and algorithm procedures, wrapping them in formatted shaded callout boxes.</p>
+            </div>
+            <div class="glass-panel p-5 rounded-xl space-y-2">
+                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">☷</div>
+                <h3 class="font-bold text-sm text-slate-800">2-Column Layout Reading</h3>
+                <p class="text-xs text-slate-500">Detects column boundaries so left and right text streams are never interleaved, preserving natural academic reading flow.</p>
+            </div>
+        </div>
+
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-200 py-6 text-center text-xs text-slate-500 bg-white/50">
-        FarazanPDF Layout-Preserving Converter — Works locally in your browser with complete privacy.
+    <footer class="border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white/50">
+        FarazanPDFConverter Layout-Preserving Converter — Works locally on your computer and in your browser with complete privacy.
     </footer>
 
     <!-- Client-Side PDF Parsing & DOCX Generation Engine -->

@@ -1,4 +1,4 @@
-# 📄 OmniPDF: Layout-Preserving PDF to Word (DOCX) Converter
+# 📄 FarazanPDFConverter: Layout-Preserving PDF to Word (DOCX) Converter
 
 > **High-Fidelity PDF to Word converter** designed for **Computer Science papers**, STEM publications (arXiv, IEEE, ACM, Springer), brochures, forms, and reports — preserving exact visual layouts, 2-column reading order, native editable Word LaTeX math equations (`<m:oMath>`), algorithms, and tables without altering the format.
 
@@ -33,7 +33,8 @@
 
 ```bash
 # Clone or navigate to the directory
-cd /path/to/PDFEDITOR
+git clone https://github.com/FaezehMillerAI/FarazanPDFConverter.git
+cd FarazanPDFConverter
 
 # Create and activate virtual environment
 python3 -m venv venv
@@ -103,42 +104,6 @@ result = converter.convert(
 )
 
 print(f"Converted in {result['duration_seconds']}s -> {result['output_file']}")
-```
-
----
-
-## 📁 Project Structure
-
-```
-PDFEDITOR/
-├── src/
-│   └── omnipdf/
-│       ├── __init__.py
-│       ├── core/
-│       │   ├── converter.py          # Master conversion orchestrator
-│       │   ├── inspector.py          # Pre-flight PDF layout & font analyzer
-│       │   ├── layout_detector.py    # Geometric column & reading order parser
-│       │   ├── math_engine.py        # LaTeX / Unicode to native Word OMML (<m:oMath>)
-│       │   ├── code_detector.py      # Monospace algorithm & code block extractor
-│       │   ├── table_extractor.py    # Bordered & borderless table builder
-│       │   ├── academic_converter.py # CS & Academic Paper specialist
-│       │   ├── exact_converter.py    # Pixel-perfect absolute layout converter
-│       │   └── flow_converter.py     # Standard flowing text converter
-│       ├── cli/
-│       │   └── main.py               # Typer & Rich CLI
-│       └── web/
-│           ├── app.py                # FastAPI backend
-│           └── templates/
-│               └── index.html        # Modern drag & drop UI
-├── skills/
-│   └── pdf-to-word/
-│       └── SKILL.md                  # Portable Agent Skill definition
-├── scripts/
-│   └── pdf2word.py                   # CLI wrapper script
-├── tests/
-│   └── test_converter.py             # Comprehensive test suite
-├── pyproject.toml
-└── README.md
 ```
 
 ---
