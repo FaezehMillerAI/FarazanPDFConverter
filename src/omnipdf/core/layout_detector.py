@@ -90,10 +90,20 @@ class LayoutDetector:
         self.width = self.rect.width
         self.height = self.rect.height
 
-    def analyze(self, extracted_tables: Optional[List[Dict[str, Any]]] = None) -> List[LayoutBlock]:
+    def analyze(self, extracted_tables: Optional[List[Dict[str, Any]]] = None, enable_ocr: bool = True) -> List[LayoutBlock]:
         """Analyze page layout, detect column regions, classify blocks, and sort in reading order."""
         raw_dict = self.page.get_text("dict")
         raw_blocks = raw_dict.get("blocks", [])
+
+        # Check if page is scanned and needs OCR
+        text_char_count = sum([len(span.get("text", "")) for b in raw_blocks for l in b.get("lines", []) for span in l.get("spans", [])])
+        if text_char_count < 40 and enable_ocr:
+            from omnipdf.core.ocr_engine import OCRAgent
+            ocr_agent = OCRAgent()
+            if ocr_agent.is_page_scanned(self.page):
+                ocr_dict = ocr_agent.extract_text_dict_with_ocr(self.page)
+                if ocr_dict.get("blocks"):
+                    raw_blocks = ocr_dict.get("blocks", [])
 
         # 1. Parse raw text blocks into structured LayoutBlocks
         parsed_blocks = []

@@ -100,6 +100,16 @@ class ExactLayoutConverter:
             text_dict = page.get_text("dict")
             blocks = text_dict.get("blocks", [])
 
+            # Run OCR fallback if page has no text layers
+            text_char_count = sum([len(span.get("text", "")) for b in blocks for l in b.get("lines", []) for span in l.get("spans", [])])
+            if text_char_count < 40:
+                from omnipdf.core.ocr_engine import OCRAgent
+                ocr_agent = OCRAgent()
+                if ocr_agent.is_page_scanned(page):
+                    ocr_dict = ocr_agent.extract_text_dict_with_ocr(page)
+                    if ocr_dict.get("blocks"):
+                        blocks = ocr_dict.get("blocks", [])
+
             for b in blocks:
                 if b.get("type") != 0:  # Text blocks only
                     continue

@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- docx.js for in-browser DOCX generation -->
     <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+    <!-- Tesseract.js for in-browser OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- FileSaver.js for saving generated DOCX in browser -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <!-- Google Fonts -->
@@ -232,6 +234,14 @@
                         <div>
                             <span class="font-semibold text-slate-800">Extract High-Resolution Figures</span>
                             <p class="text-[11px] text-slate-500">Renders diagrams and vector art at 300 DPI</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center space-x-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer">
+                        <input type="checkbox" id="optOcr" checked class="w-4 h-4 text-sky-600 rounded">
+                        <div>
+                            <span class="font-semibold text-slate-800">🤖 AI OCR Agent for Scanned Pages</span>
+                            <p class="text-[11px] text-slate-500">Auto-detects and recognizes text in scanned PDFs</p>
                         </div>
                     </label>
 
